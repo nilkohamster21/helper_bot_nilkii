@@ -11,13 +11,14 @@ from docx import Document
 selected_template = ''  # сюда будет записываться номер выбранного шаблона
 
 # далее в коде обращение в нейросети
-TOGETHER_API_KEY = "db9931155326c1ceeec02475db83439194ac158cefdc7b759d50ff9f3d25fa8c" # мой api ключ для запросов https://together.ai
+TOGETHER_API_KEY = "db9931155326c1ceeec02475db83439194ac158cefdc7b759d50ff9f3d25fa8c"  # мой api ключ для запросов https://together.ai
 together_model = "mistralai/Mixtral-8x7B-Instruct-v0.1"
 
 headers = {
     "Authorization": f"Bearer {TOGETHER_API_KEY}",  # заголовок авторизации с api ключом
-    "Content-Type": "application/json" # указываем, что отправляем данные в формате json
+    "Content-Type": "application/json"  # указываем, что отправляем данные в формате json
 }
+
 
 # функция обращается к нейросети и разделяет текст на блоки
 def split_text_into_blocks(text):
@@ -36,7 +37,7 @@ def split_text_into_blocks(text):
     }
 
     response = requests.post(
-        "https://api.together.xyz/v1/completions", # адрес, куда отправляется запрос
+        "https://api.together.xyz/v1/completions",  # адрес, куда отправляется запрос
         headers=headers,  # заголовки запроса
         data=json.dumps(data)  # тело запроса в формате json
     )
@@ -95,6 +96,7 @@ async def new_presentation(message, context):
     media_group = [InputMediaPhoto(link) for link in IMAGE_LINKS1]
     await message.reply_media_group(media=media_group)  # Высылаются изображения - шаблоны лдя презентаций
 
+
 # функция высылает ещё шаблоны
 async def more_templates(update, context):
     template_response = update.message.text
@@ -134,6 +136,7 @@ async def more_templates(update, context):
     else:
         await update.message.reply_text("Ошибка, нажмите на кнопку")
 
+
 # функция получает текст и отправляет его на разделение по блокам
 async def getting_the_text(update, context):
     document = update.message.document
@@ -144,7 +147,7 @@ async def getting_the_text(update, context):
     try:
         await file.download_to_drive(file_path)  # скачивается файл
 
-    # чтение файла в зависимости от формата
+        # чтение файла в зависимости от формата
         if file_name.endswith('.txt'):
             with open(file_path, "r", encoding="utf-8") as f:
                 text = f.read()  # чтение файла
