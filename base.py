@@ -129,7 +129,7 @@ async def more_templates(update, context):
         context.user_data['selected_template'] = template_response
 
         await update.message.reply_text(
-            f"Вы выбрали шаблон №{template_response}. Теперь отправьте текст для слайдов.")
+            f"Вы выбрали шаблон №{template_response}. Теперь отправьте текст для слайдов в формате .txt или .docx..")
 
     else:
         await update.message.reply_text("Ошибка, нажмите на кнопку")
@@ -144,7 +144,7 @@ async def getting_the_text(update, context):
     try:
         await file.download_to_drive(file_path)  # скачивается файл
 
-    #
+    # чтение файла в зависимости от формата
         if file_name.endswith('.txt'):
             with open(file_path, "r", encoding="utf-8") as f:
                 text = f.read()  # чтение файла
