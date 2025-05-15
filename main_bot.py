@@ -64,7 +64,7 @@ def split_text_into_blocks(text):
         orig_output = response.json()["choices"][0]["text"]  # если всё ок, возвращаем текст из ответа
         clean_output = orig_output[
                        orig_output.find('['):orig_output.rfind(']') + 1]  # обрезаем только список на всякий случай
-        return clean_output
+        return clean_output # ВОЗВРАЩЕНИЕ СПИСКА ТЕКСТА
     else:
         print("Ошибка:", response.status_code, response.text)  # выводим ошибку, если что-то не так
         return None
@@ -234,6 +234,52 @@ async def getting_the_photo(update, context):
     context.user_data.setdefault('photo_paths', []).append(file_path)  # добавляем путь к фото в данные пользователя
     await update.message.reply_text("Фото получено!")
 
+def handle_document(update, context):
+    document = update.message.document
+    file_name = document.file_name.lower()
+    file_extension = os.path.splitext(file_name)[-1]
+
+    # поддерживаемые расширения
+    text_extensions = ['.txt', '.docx']
+    image_extensions = ['.jpg', '.jpeg', '.png', '.webp']
+
+    file = document.get_file()
+    file_path = os.path.join("downloads", file_name)
+
+    # создаём папку, если нет
+    os.makedirs("downloads", exist_ok=True)
+    file.download(file_path)
+
+    if file_extension in text_extensions:
+        try:
+            if file_extension == ".txt":
+                with open(file_path, encoding="utf-8") as f:
+                    content = f.read()
+            elif file_extension == ".docx":
+                import docx
+                doc = docx.Document(file_path)
+                content = "\n".join([para.text for para in doc.paragraphs])
+
+            result = split_text_into_blocks(content)
+            if result:
+                context.user_data['presentation_text'] = result
+                update.message.reply_text("Текст из документа обработан. Теперь отправь фото.")
+            else:
+                update.message.reply_text("Ошибка при обработке текста.")
+        except Exception as e:
+            update.message.reply_text("Ошибка при чтении документа.")
+            print(e)
+
+    elif file_extension in image_extensions:
+        # Перемещаем файл в папку фото
+        photo_path = os.path.join(PHOTO_DIR, file_name)
+        os.rename(file_path, photo_path)
+        context.user_data.setdefault('photo_paths', []).append(photo_path)
+        update.message.reply_text("Изображение получено! Чтобы собрать презентацию, отправь /make.")
+    else:
+        os.remove(file_path)
+        update.message.reply_text("Формат файла не поддерживается. Пришлите .txt, .docx или изображение.")
+
 
 # Функция помощи
 async def help(update, context):
@@ -262,6 +308,7 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, more_templates))
     application.add_handler(MessageHandler(filters.Document.ALL, getting_the_text))
     application.add_handler(MessageHandler(filters.PHOTO, getting_the_photo))
+    application.add_handler(MessageHandler(filters.Document, handle_document))
     application.add_handler(CommandHandler("help", help))
     application.add_handler(CommandHandler("close", close_keyboard))
     print("Бот запущен")

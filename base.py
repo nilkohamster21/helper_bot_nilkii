@@ -71,9 +71,9 @@ async def start(update, context):
         [InlineKeyboardButton('новая презентация', callback_data='new_presentation')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
+    user = update.effective_user
     await update.message.reply_text(
-        "Здравствуйте, я бот, который быстро сделает вам презентацию. Чтобы создать новую нажмите нажмите на кнопку ниже",
+        f"Здравствуйте, я бот, который быстро сделает вам презентацию.{user} Чтобы создать новую нажмите нажмите на кнопку ниже",
         reply_markup=reply_markup
     )
 
