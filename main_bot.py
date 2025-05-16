@@ -10,6 +10,8 @@ import json
 from docx import Document
 from database import init_db, save_user, save_in_bd_presentation_title, get_presentations_by_user
 from presentation_builder import generate_presentation
+import ast
+
 
 selected_template = ''  # сюда будет записываться номер выбранного шаблона
 PHOTO_DIR = 'photos'
@@ -20,7 +22,7 @@ if not os.path.exists(PHOTO_DIR):
     os.makedirs(PHOTO_DIR)
 
 # далее в коде обращение в нейросети
-TOGETHER_API_KEY = "tgp_v1_WK-V6_Yk_HsXUP4gbSZoOilz9Q-L-RJc1tEmJlvGnGk"  # мой api ключ для запросов https://together.ai
+TOGETHER_API_KEY = "tgp_v1_Wfv8OnRcWyx81O8bpK-oUhjHMCkC6onP9QYMfGb-sps"  # мой api ключ для запросов https://together.ai
 together_model = "mistralai/Mixtral-8x7B-Instruct-v0.1"
 
 headers = {
@@ -64,12 +66,27 @@ def split_text_into_blocks(text):
     )
 
     if response.status_code == 200:
-        orig_output = response.json()["choices"][0]["text"]  # если всё ок, возвращаем текст из ответа
-        clean_output = orig_output[
-                       orig_output.find('['):orig_output.rfind(']') + 1]  # обрезаем только список на всякий случай
-        return clean_output  # ВОЗВРАЩЕНИЕ СПИСКА ТЕКСТА
+        orig_output = response.json()["choices"][0]["text"]
+
+        clean_output = orig_output[orig_output.find('['):orig_output.rfind(']') + 1]
+
+        try:
+            blocks = json.loads(clean_output)
+        except json.JSONDecodeError:
+            try:
+                blocks = ast.literal_eval(clean_output)
+            except Exception as e:
+                print(f"Ошибка разбора ответа от модели: {e}")
+                return None
+
+        # Проверка результата
+        if isinstance(blocks, list) and all(isinstance(x, str) for x in blocks) and len(blocks) == 6:
+            return blocks
+        else:
+            print(f"Получен некорректный формат блоков: {blocks}")
+            return None
     else:
-        print("Ошибка:", response.status_code, response.text)  # выводим ошибку, если что-то не так
+        print("Ошибка запроса:", response.status_code, response.text)
         return None
 
 
@@ -80,7 +97,7 @@ init_db()
 # Старт
 async def start(update, context):
     keyboard = [
-        [InlineKeyboardButton('новая презентация', callback_data='new_presentation')]
+        [InlineKeyboardButton('Новая презентация', callback_data='new_presentation')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     user = update.effective_user
@@ -276,55 +293,56 @@ async def button_make_presentation(update, context):
 
     if query.data == "create_presentation":
         await query.edit_message_text("Запускаю создание презентации...")
+        await create_presentation(query, context)
 
-
-async def create_presentation(message, context):
-    user_data = context.user_data
-
-    title = user_data.get('presentation_title')
-    photos = user_data.get('photo_paths', [])
-    texts = user_data.get('presentation_text', [])
-    template = user_data.get('selected_template')
-
-    # проверяем, что данные есть
-    if not title or not photos or not texts or not template:
-        await message.reply_text("Не все данные для презентации заполнены.")
-        return
-
+async def create_presentation(query, context):
     try:
-        # title и template в нужном формате
-        formatted_title = f"{title}.pptx"
-        formatted_template = f"template_{template}.json"
+        user_data = context.user_data
 
-        presentation_file = await generate_presentation(texts, photos, formatted_template, formatted_title)
+        # проверяем, что все данные есть
+        required_fields = ['presentation_text', 'photo_paths', 'selected_template']
+        missing_fields = [field for field in required_fields if field not in user_data]
 
-        # отправляем презентацию пользователю
-        with open(presentation_file, 'rb') as file:
-            await message.reply_document(file, caption=f"Ваша презентация: {title}")
+        if missing_fields:
+            raise ValueError(f"Не хватает данных: {', '.join(missing_fields)}")
+
+        # проверяем, что текст и фото не None
+        if user_data['presentation_text'] is None:
+            raise ValueError("Текст презентации не был обработан!")
+
+        if not user_data['photo_paths'] or any(photo is None for photo in user_data['photo_paths']):
+            raise ValueError("Фотографии не были загружены!")
+
+        # если название не указано, используем "Презентация"
+        title = user_data.get('presentation_title', 'Презентация') + ".pptx"
+
+        # генерируем презентацию
+        presentation_file = generate_presentation(
+            user_data['presentation_text'],
+            user_data['photo_paths'],
+            f"template_{user_data['selected_template']}.json",
+            title
+        )
+
+        # проверяем, что файл создан
+        if not os.path.exists(presentation_file):
+            raise ValueError("Не удалось создать файл презентации!")
+
+        # отправляем пользователю
+        with open(presentation_file, 'rb') as f:
+            await query.message.reply_document(f)
 
         # очищаем временные файлы
         for photo_path in user_data['photo_paths']:
             if os.path.exists(photo_path):
                 os.remove(photo_path)
-
-        # удаляем временный файл презентации, если нужно
         if os.path.exists(presentation_file):
             os.remove(presentation_file)
 
-        await message.reply_text("Презентация создана! Спасибо за использование бота.",
-                                 reply_markup=ReplyKeyboardRemove())
-
-        save_in_bd_presentation_title(message.from_user.id,
-                                      user_data['presentation_title'])  # сохраняем информацию о презентации в БД
-
-        context.user_data.clear()  # очищаем user_data
-
-        return ConversationHandler.END
+        await query.edit_message_text("Презентация успешно создана!")
 
     except Exception as e:
-        await message.reply_text(f"Произошла ошибка при создании презентации: {str(e)}")
-        return CONFIRMATION
-
+        await query.edit_message_text(f"Ошибка: {str(e)}")
 
 async def cancel(update: Update, context: CallbackContext):
     await update.message.reply_text(

@@ -77,10 +77,11 @@ def generate_presentation(text_blocks, image_paths, template_config_path, title_
     # сохранение презентации
     prs.save(title_output)
     print(f"Презентация сохранена как {title_output}")
+    return title_output
 
-#
-#
-#
+
+
+
 #
 # generate_presentation(
 #     text_blocks=[
@@ -102,5 +103,5 @@ def generate_presentation(text_blocks, image_paths, template_config_path, title_
 #         "Мышь 5.jpg"
 #     ],
 #     template_config_path="template_1.json",
-#     title_output="output6.pptx"
+#     title_output="ghj.pptx"
 # )
