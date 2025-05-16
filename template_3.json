@@ -1,0 +1,24 @@
+{
+  "slide2": {
+    "text_blocks": [
+      { "x": 11.19, "y": 2.3 , "width": 13.54, "height": 4 },
+      { "x": 1.63, "y": 10.47 , "width": 13.54, "height": 4 }
+    ],
+    "images": [
+      { "x": 1.98, "y": 2.88, "max_width": 7 },
+      { "x": 16.78, "y": 10.47 , "max_width": 7 }
+    ]
+  },
+  "slide3": {
+    "text_blocks": [
+      { "x": 0.85, "y": 8.06, "width": 7, "height": 3 },
+      { "x": 8.82, "y": 8.06, "width": 7, "height": 3 },
+      { "x": 16.46, "y": 0.84, "width": 7, "height": 3 }
+    ],
+    "images": [
+      { "x": 1.85, "y": 1.52, "max_width": 5 },
+      { "x": 9.46, "y": 1.52, "max_width": 5 },
+      { "x": 16.96, "y": 10.69, "max_width": 5 }
+    ]
+  }
+}
