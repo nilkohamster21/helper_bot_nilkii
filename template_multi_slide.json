@@ -1,0 +1,35 @@
+{
+  "slide_width_cm": 33.867,
+  "slide_height_cm": 19.05,
+
+  "slides": [
+    {
+      "text_blocks": [
+        {"x_cm": 5, "y_cm": 5, "width_cm": 24, "height_cm": 4}
+      ],
+      "image_blocks": []
+    },
+    {
+      "text_blocks": [
+        {"x_cm": 1.61, "y_cm": 4.39, "width_cm": 14, "height_cm": 4},
+        {"x_cm": 2, "y_cm": 14.25, "width_cm": 14, "height_cm": 4}
+      ],
+      "image_blocks": [
+        {"x_cm": 19.46, "y_cm": 4.39, "width_cm": 12, "height_cm": 4},
+        {"x_cm": 1.61, "y_cm": 8, "width_cm": 12, "height_cm": 4}
+      ]
+    },
+    {
+      "text_blocks": [
+        {"x_cm": 2, "y_cm": 2, "width_cm": 10, "height_cm": 3},
+        {"x_cm": 2, "y_cm": 6, "width_cm": 10, "height_cm": 3},
+        {"x_cm": 2, "y_cm": 10, "width_cm": 10, "height_cm": 3}
+      ],
+      "image_blocks": [
+        {"x_cm": 14, "y_cm": 2, "width_cm": 8, "height_cm": 4},
+        {"x_cm": 14, "y_cm": 7, "width_cm": 8, "height_cm": 4},
+        {"x_cm": 24, "y_cm": 5, "width_cm": 8, "height_cm": 4}
+      ]
+    }
+  ]
+}
