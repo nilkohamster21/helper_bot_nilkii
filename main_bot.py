@@ -123,7 +123,7 @@ async def select_template(message, context):
     reply_keyboard1 = [
         ['1', '2', '3', '4'],
         ['5', '6', '7', '8'],
-        ['9', '10', 'Ещё шаблоны']
+        ['9', '10', 'ещё шаблоны']
     ]
     markup1 = ReplyKeyboardMarkup(reply_keyboard1, one_time_keyboard=True, resize_keyboard=True)
 
