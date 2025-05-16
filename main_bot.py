@@ -4,14 +4,13 @@ from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InputMedi
     InlineKeyboardMarkup
 from telegram.ext import CommandHandler, Application, MessageHandler, filters, CallbackQueryHandler, \
     ConversationHandler, CallbackContext
-from config import BOT_TOKEN
+from config import BOT_TOKEN, TOGETHER_API_KEY
 import requests
 import json
 from docx import Document
 from database import init_db, save_user, save_in_bd_presentation_title, get_presentations_by_user
 from presentation_builder import generate_presentation
 import ast
-
 
 selected_template = ''  # сюда будет записываться номер выбранного шаблона
 PHOTO_DIR = 'photos'
@@ -22,7 +21,6 @@ if not os.path.exists(PHOTO_DIR):
     os.makedirs(PHOTO_DIR)
 
 # далее в коде обращение в нейросети
-TOGETHER_API_KEY = "tgp_v1_Wfv8OnRcWyx81O8bpK-oUhjHMCkC6onP9QYMfGb-sps"  # мой api ключ для запросов https://together.ai
 together_model = "mistralai/Mixtral-8x7B-Instruct-v0.1"
 
 headers = {
@@ -119,13 +117,13 @@ async def new_presentation_is_pressed(update, context):
 
 # Функция создания новой презентации
 async def select_template(message, context):
-    # клавиатура1
-    reply_keyboard1 = [
-        ['1', '2', '3', '4'],
-        ['5', '6', '7', '8'],
-        ['9', '10', 'ещё шаблоны']
+    # клавиатура
+    reply_keyboard = [
+        ['1', '2', '3'],
+        ['4', '5', '6'],
+        ['7', '8', '9']
     ]
-    markup1 = ReplyKeyboardMarkup(reply_keyboard1, one_time_keyboard=True, resize_keyboard=True)
+    markup1 = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
 
     await message.reply_text(
         "Выберите шаблон для презентации:", reply_markup=markup1)
@@ -136,67 +134,16 @@ async def select_template(message, context):
         'https://easy-exam.ru/static/main_page/image/tasks/882.png',
         'https://easy-exam.ru/static/main_page/image/tasks/883.png',
         'https://easy-exam.ru/static/main_page/image/tasks/884.png',
-        'https://easy-exam.ru/static/main_page/image/tasks/885.png',
         'https://easy-exam.ru/static/main_page/image/tasks/886.png',
-        'https://easy-exam.ru/static/main_page/image/tasks/887.png',
         'https://easy-exam.ru/static/main_page/image/tasks/888.png',
-        'https://easy-exam.ru/static/main_page/image/tasks/889.png'
+        'https://easy-exam.ru/static/main_page/image/tasks/894.png',
+        'https://easy-exam.ru/static/main_page/image/tasks/898.png'
 
     ]
 
     media_group = [InputMediaPhoto(link) for link in IMAGE_LINKS1]
     await message.reply_media_group(media=media_group)  # Высылаются изображения - шаблоны лдя презентаций
     return SELECT_TEMPLATE
-
-
-# функция высылает ещё шаблоны
-async def more_templates(update, context):
-    template_response = update.message.text
-    if template_response == 'ещё шаблоны':
-        # клавиатура2
-        reply_keyboard2 = [
-            ['11', '12', '13', '14'],
-            ['15', '16', '17', '18'],
-            ['19', '20', 'Назад']
-        ]
-        markup2 = ReplyKeyboardMarkup(reply_keyboard2, one_time_keyboard=True, resize_keyboard=True)
-
-        await update.message.reply_text(
-            'Вот еще шаблоны:', reply_markup=markup2)
-
-        IMAGE_LINKS2 = [  # Ссылки на изображения чтобы не скачивать изображеня
-            'https://easy-exam.ru/static/main_page/image/tasks/890.png',
-            'https://easy-exam.ru/static/main_page/image/tasks/891.png',
-            'https://easy-exam.ru/static/main_page/image/tasks/892.png',
-            'https://easy-exam.ru/static/main_page/image/tasks/893.png',
-            'https://easy-exam.ru/static/main_page/image/tasks/894.png',
-            'https://easy-exam.ru/static/main_page/image/tasks/895.png',
-            'https://easy-exam.ru/static/main_page/image/tasks/896.png',
-            'https://easy-exam.ru/static/main_page/image/tasks/897.png',
-            'https://easy-exam.ru/static/main_page/image/tasks/898.png',
-            'https://easy-exam.ru/static/main_page/image/tasks/899.png'
-
-        ]
-        media_group = [InputMediaPhoto(link) for link in IMAGE_LINKS2]
-        await update.message.reply_media_group(media=media_group)  # Высылаются изображения - шаблоны лдя презентаций
-        return SELECT_TEMPLATE
-
-    elif template_response == 'назад':
-        await select_template(update, context)
-        return SELECT_TEMPLATE
-
-    elif template_response.isdigit() and 1 <= int(template_response) <= 20:
-        context.user_data['selected_template'] = template_response  # сохраняем результат во временное хранилище
-        await update.message.reply_text(
-            f"Вы выбрали шаблон №{template_response}.\n"
-            "Теперь отправьте текст для слайдов в формате .txt или .docx.",
-            reply_markup=ReplyKeyboardRemove()
-        )
-        return WAITING_TEXT
-
-    else:
-        await update.message.reply_text("Ошибка, нажмите на кнопку")
-        return SELECT_TEMPLATE
 
 
 # функция получает текст и отправляет его на разделение по блокам
@@ -295,6 +242,7 @@ async def button_make_presentation(update, context):
         await query.edit_message_text("Запускаю создание презентации...")
         await create_presentation(query, context)
 
+
 async def create_presentation(query, context):
     try:
         user_data = context.user_data
@@ -320,7 +268,7 @@ async def create_presentation(query, context):
         presentation_file = generate_presentation(
             user_data['presentation_text'],
             user_data['photo_paths'],
-            f"template_{user_data['selected_template']}.json",
+            f"templates/template_{user_data['selected_template']}.json",
             title
         )
 
@@ -343,6 +291,7 @@ async def create_presentation(query, context):
 
     except Exception as e:
         await query.edit_message_text(f"Ошибка: {str(e)}")
+
 
 async def cancel(update: Update, context: CallbackContext):
     await update.message.reply_text(
@@ -398,7 +347,7 @@ def main():
         entry_points=[CommandHandler('start', start)],
         states={
             SELECT_TEMPLATE: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, more_templates),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, getting_the_text),
                 MessageHandler(filters.Document.ALL, getting_the_text)
             ],
             WAITING_TEXT: [

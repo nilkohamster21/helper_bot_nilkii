@@ -1,12 +1,12 @@
 {
   "slide2": {
     "text_blocks": [
-      { "x": 1.98, "y": 1.99 , "width": 13.54, "height": 4 },
-      { "x": 10.84, "y": 10.03 , "width": 13.54, "height": 4 }
+      { "x": 11.19, "y": 2.3 , "width": 13.54, "height": 4 },
+      { "x": 1.63, "y": 10.47 , "width": 13.54, "height": 4 }
     ],
     "images": [
-      { "x": 1.98, "y": 10.65, "max_width": 7 },
-      { "x": 16.69, "y": 1.99 , "max_width": 7 }
+      { "x": 1.98, "y": 2.88, "max_width": 7 },
+      { "x": 16.78, "y": 10.47 , "max_width": 7 }
     ]
   },
   "slide3": {
