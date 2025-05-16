@@ -13,7 +13,7 @@ from presentation_builder import generate_presentation
 import ast
 
 selected_template = ''  # сюда будет записываться номер выбранного шаблона
-PHOTO_DIR = 'photos'
+PHOTO_DIR = '/tmp/photos'
 SELECT_TEMPLATE, WAITING_TEXT, WAITING_PHOTOS, WAITING_TITLE, CONFIRMATION = range(5)  # состояния
 
 # создаем директорию для фото, если ее нет
@@ -376,7 +376,6 @@ def main():
     # запускаем бота
     print("Бот запущен")
     application.run_polling()
-
 
 if __name__ == "__main__":
     main()
