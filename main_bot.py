@@ -4,13 +4,15 @@ from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InputMedi
     InlineKeyboardMarkup
 from telegram.ext import CommandHandler, Application, MessageHandler, filters, CallbackQueryHandler, \
     ConversationHandler, CallbackContext
-from config import BOT_TOKEN, TOGETHER_API_KEY
 import requests
 import json
 from docx import Document
 from database import init_db, save_user, save_in_bd_presentation_title, get_presentations_by_user
 from presentation_builder import generate_presentation
 import ast
+
+BOT_TOKEN = os.getenv("8181786703:AAGtCM_NtzqsA-n192O9iMlSjV7t2bOfElU")
+TOGETHER_API_KEY = os.getenv("tgp_v1_Wfv8OnRcWyx81O8bpK-oUhjHMCkC6onP9QYMfGb-sps")  # мой api ключ для запросов https://together.ai
 
 selected_template = ''  # сюда будет записываться номер выбранного шаблона
 PHOTO_DIR = '/tmp/photos'
