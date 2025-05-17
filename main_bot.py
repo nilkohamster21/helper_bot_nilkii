@@ -11,7 +11,7 @@ from database import init_db, save_user, save_in_bd_presentation_title, get_pres
 from presentation_builder import generate_presentation
 import ast
 
-BOT_TOKEN = os.getenv("8181786703:AAGtCM_NtzqsA-n192O9iMlSjV7t2bOfElU")
+BOT_TOKEN = os.getenv("87967552141:AAFi8g5TorVs9OfUXj8x2C5gacS8eoWSIE0")
 TOGETHER_API_KEY = os.getenv("tgp_v1_Wfv8OnRcWyx81O8bpK-oUhjHMCkC6onP9QYMfGb-sps")  # мой api ключ для запросов https://together.ai
 
 selected_template = ''  # сюда будет записываться номер выбранного шаблона
