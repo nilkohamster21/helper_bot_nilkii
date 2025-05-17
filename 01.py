@@ -145,11 +145,39 @@ async def select_template(message, context):
     return SELECT_TEMPLATE
 
 
-# обработка выбора шаблона
-async def handle_template_selection(update, context):
+# функция высылает ещё шаблоны
+async def more_templates(update, context):
     template_response = update.message.text
+    if template_response == 'ещё шаблоны':
+        # клавиатура2
+        reply_keyboard2 = [
+            ['11', '12', '13', '14'],
+            ['15', '16', '17', '18'],
+            ['19', '20', 'Назад']
+        ]
+        markup2 = ReplyKeyboardMarkup(reply_keyboard2, one_time_keyboard=True, resize_keyboard=True)
 
-    if template_response.isdigit() and 1 <= int(template_response) <= 9:
+        await update.message.reply_text(
+            'Вот еще шаблоны:', reply_markup=markup2)
+
+        IMAGE_LINKS2 = [  # Ссылки на изображения чтобы не скачивать изображеня
+            'https://easy-exam.ru/static/main_page/image/tasks/890.png',
+            'https://easy-exam.ru/static/main_page/image/tasks/891.png',
+            'https://easy-exam.ru/static/main_page/image/tasks/892.png',
+            'https://easy-exam.ru/static/main_page/image/tasks/893.png',
+            'https://easy-exam.ru/static/main_page/image/tasks/894.png',
+            'https://easy-exam.ru/static/main_page/image/tasks/895.png',
+            'https://easy-exam.ru/static/main_page/image/tasks/896.png',
+            'https://easy-exam.ru/static/main_page/image/tasks/897.png',
+            'https://easy-exam.ru/static/main_page/image/tasks/898.png',
+            'https://easy-exam.ru/static/main_page/image/tasks/899.png'
+
+        ]
+        media_group = [InputMediaPhoto(link) for link in IMAGE_LINKS2]
+        await update.message.reply_media_group(media=media_group)  # Высылаются изображения - шаблоны лдя презентаций
+        return SELECT_TEMPLATE
+
+    elif template_response.isdigit() and 1 <= int(template_response) <= 9:
         context.user_data['selected_template'] = template_response  # сохраняем результат во временное хранилище
         await update.message.reply_text(
             f"Вы выбрали шаблон №{template_response}.\n"
@@ -157,8 +185,9 @@ async def handle_template_selection(update, context):
             reply_markup=ReplyKeyboardRemove()
         )
         return WAITING_TEXT
+
     else:
-        await update.message.reply_text("Ошибка, выберите шаблон от 1 до 9")
+        await update.message.reply_text("Ошибка, нажмите на кнопку")
         return SELECT_TEMPLATE
 
 
@@ -363,7 +392,7 @@ def main():
         entry_points=[CommandHandler('start', start)],
         states={
             SELECT_TEMPLATE: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_template_selection),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, more_templates),
                 MessageHandler(filters.Document.ALL, getting_the_text)
             ],
             WAITING_TEXT: [
